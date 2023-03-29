@@ -66,7 +66,7 @@ class StudentWatcher(AbstractWatcher):
     def __init__(self, registrator: AbstractRegistrator):
         super().__init__(registrator)
         # Your code goes here
-        self.tasks = []
+        self.tasks: list[asyncio.Task] = []
 
     async def start(self) -> None:
         # Your code goes here
