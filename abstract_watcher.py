@@ -1,5 +1,6 @@
 import abc
 from typing import Coroutine, Any
+import asyncio
 
 """
 Описание задачи:
@@ -8,14 +9,14 @@ from typing import Coroutine, Any
         - возможность планирования новой задачи
         - отслеживание состояния завершенных задач (сохранение результатов их выполнения)
         - отмену незавершенных задач перед остановкой работы планировщика
-        
+
     Ниже представлен интерфейс, которому должна соответствовать ваша реализация.
-    
+
     Обратите внимание, что перед завершением работы планировщика, все запущенные им корутины должны быть
     корректным образом завершены.
-    
+
     В папке tests вы найдете тесты, с помощью которых мы будем проверять работоспособность вашей реализации
-    
+
 """
 
 
@@ -65,16 +66,31 @@ class StudentWatcher(AbstractWatcher):
     def __init__(self, registrator: AbstractRegistrator):
         super().__init__(registrator)
         # Your code goes here
-        ...
+        self.tasks = []
 
     async def start(self) -> None:
         # Your code goes here
-        ...
+        self.tasks = []
 
     async def stop(self) -> None:
         # Your code goes here
-        ...
+        await asyncio.sleep(1)
+
+        for task in self.tasks:
+            if not task.done():
+                task.cancel()
+        self.tasks = []
+
 
     def start_and_watch(self, coro: Coroutine) -> None:
         # Your code goes here
-        ...
+        task = asyncio.create_task(coro)
+
+        def register(task):
+            if task.exception():
+                self.registrator.register_error(task.exception())
+            else:
+                self.registrator.register_value(task.result())
+
+        task.add_done_callback(register)
+        self.tasks.append(task)
