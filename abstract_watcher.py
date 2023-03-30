@@ -74,12 +74,11 @@ class StudentWatcher(AbstractWatcher):
 
     async def stop(self) -> None:
         # Your code goes here
-        await asyncio.sleep(1)
-
+        # await asyncio.sleep(1)
+        _, pending = await asyncio.wait(self.tasks, timeout=1)
         for task in self.tasks:
-            if not task.done():
-                task.cancel()
-        self.tasks = []
+            task.cancel()
+        await asyncio.sleep(0)
 
 
     def start_and_watch(self, coro: Coroutine) -> None:
